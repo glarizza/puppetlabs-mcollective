@@ -18,32 +18,43 @@ class mcollective::params {
   $mc_collectives       = ''
   $mc_logfile           = '/var/log/mcollective.log'
   $mc_loglevel          = 'log'
-  $mc_daemonize         = '1'
   $mc_security_provider = 'psk'
   $mc_security_psk      = 'changemeplease'
+  $mc_package_path      = 'http://127.0.0.1/pkgs'
+  $mc_pkgname_base      = 'MCollective_Installer_Base-1.2.0.dmg'
+  $mc_pkgname_common    = 'MCollective_Installer_Common-1.2.0.dmg'
+  $mc_pkgname_client    = 'MCollective_Installer_Client-1.2.0.dmg'
 
   $nrpe_dir_real = $operatingsystem ? {
     /(?i-mx:centos|fedora|redhat|oel)/ => '/etc/nrpe.d',
     default                            => '/etc/nagios/nrpe.d',
   }
+
   $mc_service_name = $operatingsystem ? {
     /(?i-mx:darwin)/ => 'com.puppetlabs.mcollective',
     default          => 'mcollective',
   }
 
+  $mc_daemonize = $operatingsystem ? {
+    /(?i-mx:darwin)/ => '0',
+    default          => '1',
+  }
+
   $mc_libdir = $operatingsystem ? {
     /(?i-mx:ubuntu|debian)/        => '/usr/share/mcollective/plugins',
-    /(?i-mx:centos|fedora|redhat)/ => '/usr/libexec/mcollective',
+    /(?i-mx:centos|fedora|redhat|darwin)/ => '/usr/libexec/mcollective',
   }
 
   $mc_service_start = $operatingsystem ? {
     /(?i-mx:ubuntu|debian)/        => '/etc/init.d/mcollective start',
     /(?i-mx:centos|fedora|redhat)/ => '/sbin/service mcollective start',
+    /(?i-mx:darwin)/               => "/bin/launchctl start ${mc_service_name}"
   }
 
   $mc_service_stop = $operatingsystem ? {
     /(?i-mx:ubuntu|debian)/        => '/etc/init.d/mcollective stop',
     /(?i-mx:centos|fedora|redhat)/ => '/sbin/service mcollective stop',
+    /(?i-mx:darwin)/               => "/bin/launchctl stop ${mc_service_name}"
   }
 
   $plugin_base = "${mc_libdir}/mcollective"
@@ -72,3 +83,4 @@ class mcollective::params {
   $pkg_state = 'present'
 
 }
+
